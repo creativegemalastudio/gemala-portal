@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Gemala Studio - Client Portal</title>
+</head>
+<body>
+<script>
+/* ============================================================
+   ✏️  SATU-SATUNYA YANG PERLU DIUBAH:
+   Paste URL Apps Script kamu di bawah ini.
+   ============================================================ */
+
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUNSnVk5BtSYpkblJVbcIo9htffcaGs3HHFtzZYC1X_H2DtbH9mkQts6-SP6eRHX0f/exec";
+
+/* ============================================================
+   SELESAI — tidak perlu edit apapun di bawah garis ini
+   ============================================================ */
+
+var STUDIO = { nama: "Gemala Studio", inisial: "GS" };
+
+/* ---- CSS ---- */
+var style = document.createElement('style');
+style.textContent = `
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(to bottom, #030712 0%, #111827 100%);
+    background-attachment: fixed;
+    color: #fff;
+    min-height: 100vh;
+    padding-top: 70px;
+    padding-bottom: 100px;
+    overflow-x: hidden;
+}
+.header {
+    position: fixed; top:0; left:0; right:0;
+    background: rgba(17,24,39,0.97);
+    border-bottom: 1px solid #1f2937;
+    z-index: 200; padding: 1rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+}
+.header-content { display:flex; align-items:center; justify-content:space-between; }
+.header-left { display:flex; align-items:center; gap:0.75rem; }
+.header-avatar {
+    width:40px; height:40px; background:#10b981; border-radius:0.5rem;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:bold; font-size:0.875rem; color:white; flex-shrink:0;
+}
+.header-text h1 { font-size:1.125rem; font-weight:700; }
+.header-text p  { font-size:0.75rem; color:#9ca3af; }
+.bell-icon { font-size:1.5rem; }
+.container { max-width:100%; padding:1.25rem; }
+
+.tab { display:none; flex-direction:column; gap:1.25rem; }
+#overview:target  { display:flex; }
+#documents:target { display:flex; }
+#invoice:target   { display:flex; }
+body:not(:has(#overview:target)):not(:has(#documents:target)):not(:has(#invoice:target)) #overview { display:flex; }
+
+.bottom-nav {
+    position:fixed; bottom:0; left:0; right:0;
+    background:rgba(17,24,39,0.98);
+    border-top:1px solid #1f2937;
+    z-index:300; display:flex;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-link {
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    padding:0.625rem 0; gap:0.25rem; text-decoration:none;
+    color:#9ca3af; font-size:0.625rem; font-weight:500;
+    -webkit-tap-highlight-color:transparent;
+}
+.nav-link.active { color:#10b981; }
+.nav-icon { font-size:1.25rem; }
+
+.banner {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+    border-radius:0.75rem; padding:1.25rem;
+    border: 1px solid rgba(16,185,129,0.3);
+}
+.banner-label { font-size:0.75rem; color:#6ee7b7; margin-bottom:0.5rem; }
+.banner-title { font-size:1.5rem; font-weight:700; margin-bottom:0.25rem; }
+.banner-subtitle { font-size:0.875rem; color:rgba(255,255,255,0.7); }
+
+.card { background:rgba(31,41,55,0.8); border-radius:0.75rem; padding:1.25rem; border:1px solid #374151; }
+.card-header { font-size:0.75rem; font-weight:700; color:#9ca3af; letter-spacing:0.05em; margin-bottom:1rem; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+.stat-card { background:rgba(31,41,55,0.8); border-radius:0.75rem; padding:1rem; border:1px solid #374151; }
+.stat-label { font-size:0.75rem; color:#9ca3af; margin-bottom:0.5rem; }
+.stat-value { font-size:1.875rem; font-weight:700; }
+.stat-subtext { font-size:0.75rem; color:#6b7280; margin-top:0.25rem; }
+
+.progress-label { font-size:0.875rem; color:#9ca3af; margin-bottom:0.75rem; }
+.progress-bar { height:0.5rem; background:#374151; border-radius:9999px; overflow:hidden; }
+.progress-fill { height:100%; background: linear-gradient(to right, #059669, #10b981); border-radius:9999px; transition: width 1s ease; }
+
+.space-y-3 { display:flex; flex-direction:column; gap:0.75rem; }
+.timeline-item { display:flex; align-items:center; gap:0.75rem; }
+.timeline-badge {
+    width:2rem; height:2rem; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.75rem; font-weight:700; flex-shrink:0;
+}
+.timeline-badge.selesai  { background:rgba(16,185,129,0.2); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
+.timeline-badge.berjalan { background:rgba(217,119,6,0.2);  color:#f59e0b; border:1px solid rgba(217,119,6,0.3); }
+.timeline-badge.belum    { background:rgba(55,65,81,0.5);   color:#6b7280; border:1px solid #374151; }
+.timeline-title  { font-size:0.875rem; font-weight:500; }
+.timeline-status { font-size:0.75rem; padding:0.125rem 0.5rem; border-radius:9999px; }
+.timeline-status.selesai  { background:rgba(16,185,129,0.2); color:#6ee7b7; }
+.timeline-status.berjalan { background:rgba(217,119,6,0.2);  color:#fbbf24; }
+.timeline-status.belum    { background:rgba(55,65,81,0.5);   color:#9ca3af; }
+
+.notice { background:rgba(217,119,6,0.1); border:1px solid rgba(217,119,6,0.3); border-radius:0.75rem; padding:1rem; }
+.notice-title { font-size:0.875rem; font-weight:700; color:#fbbf24; margin-bottom:0.5rem; }
+.notice-text  { font-size:0.875rem; color:rgba(251,191,36,0.8); line-height:1.5; }
+
+.doc-section { background:rgba(31,41,55,0.8); border-radius:0.75rem; border:1px solid #374151; overflow:hidden; }
+.doc-section-header { padding:0.75rem 1.25rem; background:rgba(55,65,81,0.5); border-bottom:1px solid #374151; font-weight:700; font-size:0.875rem; }
+.doc-section-header.selesai  { background:rgba(16,185,129,0.1); color:#6ee7b7; }
+.doc-section-header.berjalan { background:rgba(217,119,6,0.1);  color:#fbbf24; }
+.doc-item {
+    width:100%; padding:0.75rem 1.25rem;
+    display:flex; align-items:center; gap:0.75rem;
+    border:none; border-bottom:1px solid #374151;
+    background:none; text-align:left; cursor:pointer; color:white;
+    text-decoration:none; -webkit-tap-highlight-color:transparent;
+}
+.doc-item:last-child { border-bottom:none; }
+.doc-item:active { background:rgba(55,65,81,0.4); }
+.doc-icon     { font-size:1.25rem; flex-shrink:0; }
+.doc-info     { flex:1; }
+.doc-name     { font-size:0.875rem; font-weight:500; color:white; margin-bottom:0.25rem; }
+.doc-size     { font-size:0.75rem; color:#6b7280; }
+.doc-download { color:#6b7280; font-size:1rem; }
+
+.invoice-card { border-radius:0.5rem; padding:1.25rem; }
+.invoice-card.lunas   { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); }
+.invoice-card.pending { background:rgba(217,119,6,0.1);  border:1px solid rgba(217,119,6,0.3); }
+.invoice-card.nanti   { background:rgba(55,65,81,0.3);   border:1px solid #374151; }
+.invoice-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; }
+.invoice-title.lunas   { font-size:0.875rem; font-weight:700; color:#6ee7b7; }
+.invoice-title.pending { font-size:0.875rem; font-weight:700; color:#fbbf24; }
+.invoice-title.nanti   { font-size:0.875rem; font-weight:700; color:#d1d5db; }
+.invoice-amount.lunas   { font-size:0.75rem; margin-top:0.25rem; color:#6ee7b7; }
+.invoice-amount.pending { font-size:0.75rem; margin-top:0.25rem; color:#fbbf24; }
+.invoice-amount.nanti   { font-size:0.75rem; margin-top:0.25rem; color:#9ca3af; }
+.invoice-badge { padding:0.25rem 0.5rem; font-size:0.75rem; font-weight:700; border-radius:0.25rem; border:1px solid; }
+.invoice-badge.lunas   { background:rgba(16,185,129,0.2); border-color:#10b981; color:#6ee7b7; }
+.invoice-badge.pending { background:rgba(217,119,6,0.2);  border-color:#d97706; color:#fbbf24; }
+.invoice-badge.nanti   { background:rgba(55,65,81,0.5);   border-color:#4b5563; color:#9ca3af; }
+.invoice-date.lunas   { font-size:0.75rem; margin-top:0.5rem; color:rgba(110,231,183,0.6); }
+.invoice-date.pending { font-size:0.75rem; margin-top:0.5rem; color:rgba(251,191,36,0.6); font-weight:600; }
+.invoice-date.nanti   { font-size:0.75rem; margin-top:0.5rem; color:#6b7280; }
+.invoice-button {
+    width:100%; margin-top:0.75rem; padding:0.625rem;
+    background:#059669; color:white; border:none;
+    border-radius:0.375rem; font-weight:600; font-size:0.875rem;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+    display:block; text-align:center; text-decoration:none;
+}
+.invoice-button:active { background:#047857; }
+.total-label  { font-size:0.75rem; color:#9ca3af; margin-bottom:0.5rem; }
+.total-amount { font-size:2.25rem; font-weight:700; color:white; margin-top:0.5rem; }
+
+/* Loading state */
+.loading-screen {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-height:60vh; gap:1rem; color:#9ca3af;
+}
+.loading-spinner {
+    width:40px; height:40px; border:3px solid #374151;
+    border-top-color:#10b981; border-radius:50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-screen {
+    background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3);
+    border-radius:0.75rem; padding:1.5rem; margin:1.25rem;
+    color:#fca5a5; text-align:center; line-height:1.6;
+}
+`;
+document.head.appendChild(style);
+
+/* ---- HELPERS ---- */
+function labelMilestone(s) { return s==='selesai'?'Selesai':s==='berjalan'?'Berjalan':'Belum'; }
+function ikonMilestone(s, n) { return s==='selesai'?'✓':s==='berjalan'?'→':n; }
+function labelInvoice(s) { return s==='lunas'?'✓ Lunas':s==='pending'?'⏱️ Pending':'🔒 Nanti'; }
+
+/* ---- SKELETON WHILE LOADING ---- */
+document.body.innerHTML = `
+<div class="header">
+  <div class="header-content">
+    <div class="header-left">
+      <div class="header-avatar">${STUDIO.inisial}</div>
+      <div class="header-text"><h1>${STUDIO.nama}</h1><p>Client Portal</p></div>
+    </div>
+    <span class="bell-icon">🔔</span>
+  </div>
+</div>
+<div class="container">
+  <div class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p>Memuat data proyek...</p>
+  </div>
+</div>
+<nav class="bottom-nav">
+  <a href="#overview"  class="nav-link active"><span class="nav-icon">🏠</span><span>Overview</span></a>
+  <a href="#documents" class="nav-link"><span class="nav-icon">📄</span><span>Dokumen</span></a>
+  <a href="#invoice"   class="nav-link"><span class="nav-icon">💰</span><span>Invoice</span></a>
+</nav>`;
+
+/* ---- RENDER ---- */
+function renderPortal(d) {
+    var PROYEK    = d.proyek;
+    var MILESTONE = d.milestone;
+    var DOKUMEN   = d.dokumen;
+    var INVOICE   = d.invoice;
+    var TOTAL     = d.total_proyek || "–";
+
+    document.querySelector('.container').innerHTML = `
+  <section id="overview" class="tab">
+    <div class="banner">
+      <div class="banner-label">📊 Ringkasan</div>
+      <div class="banner-title">${PROYEK.nama}</div>
+      <div class="banner-subtitle">${PROYEK.alamat}</div>
+    </div>
+    <div class="card">
+      <div class="progress-label">Progres: ${PROYEK.progres}%</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${PROYEK.progres}%"></div></div>
+    </div>
+    <div class="grid-2">
+      <div class="stat-card">
+        <div class="stat-label">Hari Tersisa</div>
+        <div class="stat-value">${PROYEK.hariTersisa}</div>
+        <div class="stat-subtext">dari ${PROYEK.totalHari}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Milestone</div>
+        <div class="stat-value">${PROYEK.milestoneSelesai}/${PROYEK.totalMilestone}</div>
+        <div class="stat-subtext">selesai</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">TIMELINE</div>
+      <div class="space-y-3">
+        ${MILESTONE.map(function(m){ return `
+        <div class="timeline-item">
+          <div class="timeline-badge ${m.status}">${ikonMilestone(m.status,m.nomor)}</div>
+          <div>
+            <div class="timeline-title">${m.nomor} ${m.nama}</div>
+            <span class="timeline-status ${m.status}">${labelMilestone(m.status)}</span>
+          </div>
+        </div>`; }).join('')}
+      </div>
+    </div>
+    <div class="notice">
+      <div class="notice-title">⚠️ Penting</div>
+      <div class="notice-text">${PROYEK.catatan}</div>
+    </div>
+  </section>
+
+  <section id="documents" class="tab">
+    ${DOKUMEN.map(function(d){ return `
+    <div class="doc-section">
+      <div class="doc-section-header ${d.status}">${d.milestone} ${d.nama_milestone}</div>
+      ${d.files.map(function(f){ return `
+      <a class="doc-item" href="${f.link}" target="_blank" rel="noopener">
+        <span class="doc-icon">${f.ikon}</span>
+        <div class="doc-info">
+          <div class="doc-name">${f.nama}</div>
+          <div class="doc-size">${f.ukuran}</div>
+        </div>
+        <span class="doc-download">↓</span>
+      </a>`; }).join('')}
+    </div>`; }).join('')}
+  </section>
+
+  <section id="invoice" class="tab">
+    <div class="card">
+      <div class="total-label">Total Proyek</div>
+      <div class="total-amount">${TOTAL}</div>
+    </div>
+    ${INVOICE.map(function(inv){ return `
+    <div class="invoice-card ${inv.status}">
+      <div class="invoice-header">
+        <div>
+          <div class="invoice-title ${inv.status}">${inv.label}</div>
+          <div class="invoice-amount ${inv.status}">${inv.jumlah}</div>
+        </div>
+        <div class="invoice-badge ${inv.status}">${labelInvoice(inv.status)}</div>
+      </div>
+      <div class="invoice-date ${inv.status}">${inv.tanggal}</div>
+      ${inv.status==='pending'?`<a class="invoice-button" href="${inv.link_bayar}" target="_blank">💳 Bayar Sekarang</a>`:''}
+    </div>`; }).join('')}
+  </section>`;
+
+    setActiveNav(window.location.hash);
+}
+
+function showError(msg) {
+    document.querySelector('.container').innerHTML = `<div class="error-screen">
+      <p style="font-size:1.25rem;margin-bottom:0.5rem">⚠️ Gagal memuat data</p>
+      <p style="font-size:0.875rem">${msg}</p>
+      <p style="font-size:0.75rem;margin-top:1rem;color:#f87171">Pastikan APPS_SCRIPT_URL sudah diisi dengan benar.</p>
+    </div>`;
+}
+
+/* ---- FETCH DATA ---- */
+if (APPS_SCRIPT_URL === "PASTE_URL_APPS_SCRIPT_DI_SINI") {
+    showError("URL Apps Script belum diisi. Buka file HTML ini dan isi variabel APPS_SCRIPT_URL di bagian atas.");
+} else {
+    fetch(APPS_SCRIPT_URL)
+        .then(function(r){ return r.json(); })
+        .then(function(data){ renderPortal(data); })
+        .catch(function(e){ showError("Tidak bisa terhubung ke Google Sheets. " + e.message); });
+}
+
+/* ---- NAV ---- */
+function setActiveNav(hash) {
+    var links = document.querySelectorAll('.nav-link');
+    for (var i=0; i<links.length; i++) {
+        var h = links[i].getAttribute('href');
+        links[i].classList.toggle('active', h===hash || (!hash && h==='#overview'));
+    }
+}
+window.addEventListener('hashchange', function(){ setActiveNav(window.location.hash); window.scrollTo(0,0); });
+setActiveNav(window.location.hash || '#overview');
+</script>
+</body>
+</html>
